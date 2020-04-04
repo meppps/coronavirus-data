@@ -11,7 +11,8 @@
 </body>
 <script>
     // var rona = JSON.parse('{{corona}}');
-    var rona = JSON.parse('{{ corona }}')
+    var data = {{ corona | tojson | safe }};
+    var rona = JSON.parse(data)
     console.log(rona)
 </script>
 </html>
