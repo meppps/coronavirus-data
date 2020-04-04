@@ -6,13 +6,115 @@
     <title>Document</title>
 </head>
 <body>
-    <p>{{ corona  }}</p>
-    
+    <!-- <p>{{ corona  }}</p> -->
+    <select name="" id="countrySelect"></select>
+    <div id="myDiv"></div>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.33.1/plotly.min.js"></script>
 <script>
     // var rona = JSON.parse('{{corona}}');
     var data = {{ corona | tojson | safe }};
-    var rona = JSON.parse(data)
-    console.log(rona)
+    var rona = JSON.parse(data);
+    var obj = rona[0];
+
+    // USA
+    console.log(obj['Country,Other'][0])
+    var totalCases = obj['TotalCases'][0];
+    var newCases = Number(obj['NewCases'][0].replace("+","").replace(",",""));
+    var totalRecovered = obj['TotalRecovered'][0];
+
+    var set = [
+    {
+        x: ['Total Cases', 'New Cases', 'Recovered so Far'],
+        y: [totalCases, newCases, totalRecovered],
+        type: 'bar'
+    }
+    ];
+
+    Plotly.newPlot('myDiv', set);
+
+    console.log(totalCases);
+
+
+    var countries = obj['Country,Other'];
+    var length = Object.values(countries).length;
+    // console.log(Object.values(countries).length)
+    // console.log(countries);
+    var list = [];
+    for(i=0;i<length;i++){
+        // console.log(countries[i])
+
+        var option = document.createElement('option');
+        option.text = countries[i];
+        option.value = countries[i];
+        var select = document.getElementById('countrySelect');
+        select.appendChild(option);
+
+        list.push(countries[i]);
+
+    }
+    // console.log(typeof(countries))
+    // var country = 'USA';
+    function findIndex(country){
+        for(i=0;i<list.length;i++){
+            if(country === list[i]){
+                // console.log(country);
+                // console.log(i)
+                return i;
+            }
+        }
+    };
+
+    // needs moved up in chain
+    function parseNum(num){
+        if(num){
+
+            if(num.includes('+')){
+                num = num.replace('+','');
+            };
+            if(num.includes(',')){
+                num = num.replace(',','');
+            };
+            // if(num.includes('k')){
+            //     num.replace('k','000')
+            // };
+            return Number(num)
+
+        }
+    };
+
+
+
+    document.getElementById('countrySelect').addEventListener('change',()=>{
+        // console.log(this.value) // doesnt work for some reason
+        var country = document.getElementById('countrySelect').value;
+        // console.log(findIndex(country));
+        var index = findIndex(country);
+
+        console.log(parseNum(obj['NewCases'][index]))
+
+        var totalCases = obj['TotalCases'][index];
+        var newCases = parseNum(obj['NewCases'][index]);
+        var totalRecovered = obj['TotalRecovered'][index];
+
+        // console.log(totalRecovered,totalCases,totalRecovered)
+
+        var set = [
+        {
+            x: ['Total Cases', 'New Cases', 'Recovered so Far'],
+            y: [totalCases, newCases, totalRecovered],
+            type: 'bar'
+        }
+        ];
+
+        Plotly.newPlot('myDiv', set)
+
+    })
+    
+
+
+    
+
+
 </script>
 </html>
