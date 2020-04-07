@@ -22,18 +22,25 @@
     var totalCases = obj['TotalCases'][0];
     var newCases = Number(obj['NewCases'][0].replace("+","").replace(",",""));
     var totalRecovered = obj['TotalRecovered'][0];
+    var totalDeaths = obj['TotalDeaths'][0];
+    var newDeaths = parseInt(obj['NewDeaths'][0]);
+    var activeCases = obj['ActiveCases'][0];
+    console.log(activeCases)
 
     var set = [
     {
-        x: ['Total Cases', 'New Cases', 'Recovered so Far'],
-        y: [totalCases, newCases, totalRecovered],
-        type: 'bar'
+        x: ['Total Cases', 'Active Cases','New Cases','Recovered','Deaths'],
+        y: [totalCases ,activeCases, newCases, totalRecovered, totalDeaths],
+        type: 'bar',
+        marker:{
+        color: ['#856c8b', '#ff7f50', '#ffeb99', '#a7e9af', '#f67280']
+        }
     }
     ];
 
     Plotly.newPlot('myDiv', set);
 
-    console.log(totalCases);
+    // console.log(totalCases);
 
 
     var countries = obj['Country,Other'];
@@ -94,17 +101,22 @@
         console.log(parseNum(obj['NewCases'][index]))
 
         var totalCases = obj['TotalCases'][index];
-        var newCases = parseNum(obj['NewCases'][index]);
+        var newCases = Number(obj['NewCases'][index].replace("+","").replace(",",""));
         var totalRecovered = obj['TotalRecovered'][index];
+        var totalDeaths = obj['TotalDeaths'][index];
+        var newDeaths = parseInt(obj['NewDeaths'][index]);
+        var activeCases = obj['ActiveCases'][index];
 
         // console.log(totalRecovered,totalCases,totalRecovered)
 
         var set = [
         {
-            x: ['Total Cases', 'New Cases', 'Recovered so Far'],
-            y: [totalCases, newCases, totalRecovered],
-            type: 'bar'
-        }
+            x: ['Total Cases', 'Active Cases','New Cases','Recovered','Deaths'],
+            y: [totalCases ,activeCases, newCases, totalRecovered, totalDeaths],
+            type: 'bar',
+            marker:{
+        color: ['#856c8b', '#ff7f50', '#ffeb99', '#a7e9af', '#f67280']
+        }}
         ];
 
         Plotly.newPlot('myDiv', set)
