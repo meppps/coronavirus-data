@@ -3,19 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>Document</title>
 </head>
+<style>
+    body{
+        /* font-family: "Open Sans", verdana, arial, sans-serif;*/
+        font-family: 'Open Sans', sans-serif;
+        background: #f4f4f4;
+    }
+
+    #plotArea1,#plotArea2{
+        text-align: center;
+    }
+
+    #location,#selectedMetric{
+        text-align: center;
+    }
+</style>
 <body>
     <!-- <p>{{ corona  }}</p> -->
-    <select name="" id="countrySelect"></select>
-    <div id="myDiv"></div>
+    <div id="plotArea1">
+        <h2>View statistics by location</h2>
+        <select name="" id="countrySelect"></select>
+        <h3 id="location">Location</h3>
+        <div id="myDiv"></div>
+    </div>
 
-    <select name="" id="compr1"></select>
-    <select name="" id="compr2"></select>
-    <select name="" id="compr3"></select>
-    <select name="" id="compr4"></select>
-    <select name="" id="metric"></select>
-    <div id="compare"></div>
+    <div id="plotArea2">
+        <h2>Compare Countries by Metric</h2>
+        <select name="" id="compr1"></select>
+        <select name="" id="compr2"></select>
+        <select name="" id="compr3"></select>
+        <select name="" id="compr4"></select>
+        <select name="" id="metric"></select>
+        <h3 id="selectedMetric">Metric</h3>
+        <div id="compare"></div>
+    </div>
+
+
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.33.1/plotly.min.js"></script>
 <script>
@@ -25,6 +51,7 @@
     var data = {{ corona | tojson | safe }};
     var rona = JSON.parse(data);
     var obj = rona[0];
+    console.log(obj)
 
     // === Predefined functions === //
     function findIndex(country){
@@ -53,11 +80,13 @@
     // ===================== //
 
     var totalCases = obj['TotalCases'][0];
-    var newCases = parseNum(obj['NewCases'][0]);
+    var newCases = obj['NewCases'][0];
     var totalRecovered = obj['TotalRecovered'][0];
     var totalDeaths = obj['TotalDeaths'][0];
     var newDeaths = parseInt(obj['NewDeaths'][0]);
     var activeCases = obj['ActiveCases'][0];
+    var selectedLocation = document.getElementById('location');
+    var selectedMetric = document.getElementById('selectedMetric');
 
    
 
@@ -75,8 +104,10 @@
     ];
 
 
-    Plotly.newPlot('myDiv',set);
 
+
+    Plotly.newPlot('myDiv',set)
+    
 
 
     // Create list of countries
@@ -93,6 +124,7 @@
         list.push(countries[i]);
 
     };
+    selectedLocation.innerText = document.getElementById('countrySelect').value;
 
     // ==== Update Plot === //
     document.getElementById('countrySelect').addEventListener('change',()=>{
@@ -101,7 +133,7 @@
         var country = document.getElementById('countrySelect').value;
         var index = findIndex(country);
         var totalCases = obj['TotalCases'][index];
-        var newCases = parseNum(obj['NewCases'][index]);
+        var newCases = obj['NewCases'][index];
         var totalRecovered = obj['TotalRecovered'][index];
         var totalDeaths = obj['TotalDeaths'][index];
         var newDeaths = parseInt(obj['NewDeaths'][index]);
@@ -120,6 +152,8 @@
         ];
 
         Plotly.newPlot('myDiv', set);
+
+        selectedLocation.innerText = document.getElementById('countrySelect').value;
 
 
     });
@@ -195,7 +229,7 @@
         ];
 
         Plotly.newPlot('compare', comp);
-
+        selectedMetric.innerText = metricSelector.value;
 
 
     // ===================== //
@@ -247,7 +281,8 @@
                     }
                 ];
             
-                Plotly.newPlot('compare',comp)
+                Plotly.newPlot('compare',comp);
+                selectedMetric.innerText = metricSelector.value;
             })
         });
 
