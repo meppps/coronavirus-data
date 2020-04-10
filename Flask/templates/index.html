@@ -3,16 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>Document</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
 </head>
-<body>
-    <p>{{ corona  }}</p>
+<style>
+    body{
+        /* font-family: "Open Sans", verdana, arial, sans-serif;*/
+        font-family: 'Open Sans', sans-serif !important;
+        background: #f4f4f4;
+        color: #fff !important;
+    }
+
+    #plotArea1,#plotArea2{
+        text-align: center !important;
+    }
+
+    #location,#selectedMetric{
+        text-align: center !important;
+    }
+
+
+
+</style>
+
+<style>
+    /* map styles */
+
+.header{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; 
+    color:white;
     
+}
+body{
+    background-color: #1F2833;
+}
+.topnav{
+    background-color: #2E1114;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; 
+
+}
+
+.topnav a {
+    display: inline-block;
+    color: white; 
+    text-align: left;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    
+}
+
+#covidmap{
+    height: 500px;
+    
+}
+</style>
+<body>
+
+    <div class="header">
+        <h1> Infected Areas</h1>
+    </div>
+  <!-- Top Nav-->  
+    <div class="topnav" id="menu">
+        <a href="#map"> Map</a>
+        <a href="#confirmed"> Confirmed Cases</a>
+        <a href="#visuals">Visualizations</a>
+        <a href="#about">About COVID19</a>
+    </div>
+    <div id="covidmap"></div>
+
+    <!-- <p>{{ corona  }}</p> -->
+    <div id="plotArea1">
+        <h2>View statistics by location</h2>
+        <select name="" id="countrySelect"></select>
+        <h3 id="location">Location</h3>
+        <div id="myDiv"></div>
+    </div>
+
+    <div id="plotArea2">
+        <h2>Compare Countries by Metric</h2>
+        <select name="" id="compr1"></select>
+        <select name="" id="compr2"></select>
+        <select name="" id="compr3"></select>
+        <select name="" id="compr4"></select>
+        <select name="" id="metric"></select>
+        <h3 id="selectedMetric">Metric</h3>
+        <div id="compare"></div>
+    </div>
+
+
 </body>
 <script>
-    // var rona = JSON.parse('{{corona}}');
+
+    // === Load in data === //
     var data = {{ corona | tojson | safe }};
-    var rona = JSON.parse(data)
-    console.log(rona)
+    var rona = JSON.parse(data);
+    var obj = rona[0];
+    console.log(obj);
+
+
+    const mymap = L.map('covidmap').setView([0, 0], 2);
+    const attribution = 
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'; 
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    const tiles = L.tileLayer(tileUrl,{ attribution }); 
+    tiles.addTo(mymap);
+
+    // for(i=0;i<)
+
+
+
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.33.1/plotly.min.js"></script>
+<script>
+
+
+    // === Load in data === //
+    var data = {{ corona | tojson | safe }};
+    var rona = JSON.parse(data);
+    var obj = rona[0];
+    console.log(obj)
+
+    // === Predefined functions === //
+    function findIndex(country){
+        for(i=0;i<list.length;i++){
+            if(country === list[i]){
+                return i;
+            }
+        }
+    };
+
+    function parseNum(num){
+        if(num){
+
+            if(num.includes('+')){
+                num = num.replace('+','');
+            };
+            if(num.includes(',')){
+                num = num.replace(',','');
+            };
+            return Number(num)
+        }
+    };
+
+    // ===================== //
+    // === Initial plot === //
+    // ===================== //
+
+    var totalCases = obj['TotalCases'][0];
+    var newCases = obj['NewCases'][0];
+    var totalRecovered = obj['TotalRecovered'][0];
+    var totalDeaths = obj['TotalDeaths'][0];
+    var newDeaths = parseInt(obj['NewDeaths'][0]);
+    var activeCases = obj['ActiveCases'][0];
+    var selectedLocation = document.getElementById('location');
+    var selectedMetric = document.getElementById('selectedMetric');
+
+   
+
+
+    var set = [
+        {
+            // title: country,
+            x: ['Total Cases', 'Active Cases','New Cases','Recovered','Deaths'],
+            y: [totalCases ,activeCases, newCases, totalRecovered, totalDeaths],
+            type: 'bar',
+            marker:{
+            color: ['#856c8b', '#ff7f50', '#ffeb99', '#a7e9af', '#f67280']
+            }
+        }
+    ];
+
+
+
+
+    Plotly.newPlot('myDiv',set)
+    
+
+
+    // Create list of countries
+    var countries = obj['Country,Other'];
+    var length = Object.values(countries).length;
+    var list = [];
+    for(i=0;i<length;i++){
+
+        var option = document.createElement('option');
+        option.text = countries[i];
+        option.value = countries[i];
+        var select = document.getElementById('countrySelect');
+        select.appendChild(option);
+        list.push(countries[i]);
+
+    };
+    selectedLocation.innerText = document.getElementById('countrySelect').value;
+
+
+
+
+    
+
+    // ==== Update Plot === //
+    document.getElementById('countrySelect').addEventListener('change',()=>{
+
+        // Get values
+        var country = document.getElementById('countrySelect').value;
+        var index = findIndex(country);
+        var totalCases = obj['TotalCases'][index];
+        var newCases = obj['NewCases'][index];
+        var totalRecovered = obj['TotalRecovered'][index];
+        var totalDeaths = obj['TotalDeaths'][index];
+        var newDeaths = parseInt(obj['NewDeaths'][index]);
+        var activeCases = obj['ActiveCases'][index];
+
+
+        // Plot
+        var set = [
+        {
+            x: ['Total Cases', 'Active Cases','New Cases','Recovered','Deaths'],
+            y: [totalCases ,activeCases, newCases, totalRecovered, totalDeaths],
+            type: 'bar',
+            marker:{
+        color: ['#856c8b', '#ff7f50', '#ffeb99', '#a7e9af', '#f67280']
+        }}
+        ];
+
+        Plotly.newPlot('myDiv', set);
+
+        selectedLocation.innerText = document.getElementById('countrySelect').value;
+
+
+    });
+    
+              
+        
+    // ===================== //
+    // Country Comparison //
+    // ===================== //
+
+
+    function initComp(){
+
+        // Define selectors
+        var compr1 = document.getElementById('compr1');
+        var compr2 = document.getElementById('compr2');
+        var metricSelector = document.getElementById('metric');
+        var metrics = ['Total Cases','Active Cases','New Cases','Recovered','Deaths'];
+
+
+        function getMetric(m){
+            return m === 'Total Cases' ? 'TotalCases':
+            m === 'Active Cases' ? 'ActiveCases':
+            m === 'New Cases' ? 'NewCases':
+            m === 'Recovered' ? 'TotalRecovered':
+            m === 'Deaths' ? 'TotalDeaths':
+            'None';
+        };
+
+
+        // Metric selector
+        metrics.forEach((met)=>{
+            var option = document.createElement('option');
+            option.value = met;
+            option.text = met;
+            metricSelector.appendChild(option);
+        });
+
+        // Country selector
+        function initSelector(selector){
+            list.forEach((country)=>{
+            var option = document.createElement('option');
+
+            option.text = country;
+            option.value = country;
+            selector.appendChild(option)
+            });
+        }; 
+
+        // Initial plot
+        initSelector(compr1);
+        initSelector(compr2);
+        initSelector(compr3);
+        initSelector(compr4);
+
+
+        var total1 = obj['TotalCases'][1];
+        var total2 = obj['TotalCases'][2];
+        var total3 = obj['TotalCases'][3];
+        var total4 = obj['TotalCases'][4];
+
+
+        var comp = [
+            {
+                x:[total1,total2,total3,total4],
+                y:[list[1],list[2],list[3],list[4]],
+                orientation: 'h',
+                type:'bar',
+                marker:{
+                    color: ['orange','lightblue','lightgreen','lightred']
+                }
+            }
+        ];
+
+        Plotly.newPlot('compare', comp);
+        selectedMetric.innerText = metricSelector.value;
+
+
+    // ===================== //
+    // Dynamic functionality //
+    // ===================== //
+
+    var selectorList = [compr1,compr2,compr3,compr4,metricSelector];
+    var selection = 0;
+
+        selectorList.forEach((selector)=>{
+            if(selector != metricSelector){
+                selector.selectedIndex = selection += 1;
+        };
+
+            // Update
+            addEventListener('change',()=>{
+                
+                // Compare by metric
+                var metric = document.getElementById('metric').value;
+
+                // Country
+                var country1 = compr1.value;
+                var country2 = compr2.value;
+                var country3 = compr3.value;
+                var country4 = compr4.value;
+
+                // Index
+                var index1 = findIndex(country1);
+                var index2 = findIndex(country2);
+                var index3 = findIndex(country3);
+                var index4 = findIndex(country4);
+
+                // Get figure
+                var total1 = obj[getMetric(metric)][index1];
+                var total2 = obj[getMetric(metric)][index2];
+                var total3 = obj[getMetric(metric)][index3];
+                var total4 = obj[getMetric(metric)][index4];
+                
+                // Plot
+                var comp = [
+                    {
+                        x:[total1,total2,total3,total4],
+                        y:[country1,country2,country3,country4],
+                        orientation:'h',
+                        type:'bar',
+                        marker:{
+                            color: ['green','blue','red','orange']
+                        }
+                    }
+                ];
+            
+                Plotly.newPlot('compare',comp);
+                selectedMetric.innerText = metricSelector.value;
+            })
+        });
+
+
+    };
+    initComp();
+
+
+    
+    // ==== Plot on map ==== // 
+    for(i=0;i<list.length;i++){
+
+        var con = list[i];
+        var coords = obj['Coords'][i];
+        var total = obj['TotalCases'][i];
+        var active = obj['ActiveCases'][i];
+        var loc = obj['Country,Other'][i];
+        var rec = obj['TotalRecovered'][i];
+
+        if(loc == 'CAR'){
+            continue
+        };
+
+
+        var text = `<h2>${loc}<h2>
+                    <h4>Total Cases: ${total}<h4>
+                    <h4>Active Cases: ${active}<h4>
+                    <h4>Recovered: ${rec}`;
+
+        L.circle(coords, {
+        fillOpacity: 0.75,
+        color: 'white',
+        fillColor: 'grey',
+        radius: 200000
+        }).bindPopup(text).addTo(mymap);
+
+
+
+        // console.log(coords)
+
+    }
+    
+
 </script>
 </html>
