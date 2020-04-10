@@ -5,23 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>Document</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
 </head>
 <style>
     body{
         /* font-family: "Open Sans", verdana, arial, sans-serif;*/
-        font-family: 'Open Sans', sans-serif;
+        font-family: 'Open Sans', sans-serif !important;
         background: #f4f4f4;
+        color: #fff !important;
     }
 
     #plotArea1,#plotArea2{
-        text-align: center;
+        text-align: center !important;
     }
 
     #location,#selectedMetric{
-        text-align: center;
+        text-align: center !important;
     }
+
+
+
+</style>
+
+<style>
+    /* map styles */
+
+.header{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; 
+    color:white;
+    
+}
+body{
+    background-color: #1F2833;
+}
+.topnav{
+    background-color: #2E1114;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; 
+
+}
+
+.topnav a {
+    display: inline-block;
+    color: white; 
+    text-align: left;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    
+}
+
+#covidmap{
+    height: 500px;
+    
+}
 </style>
 <body>
+
+    <div class="header">
+        <h1> Infected Areas</h1>
+    </div>
+  <!-- Top Nav-->  
+    <div class="topnav" id="menu">
+        <!-- <a href="#map"> Map</a>
+        <a href="#confirmed"> Confirmed Cases</a>
+        <a href="#visuals">Visualizations</a>
+        <a href="#about">About COVID19</a> -->
+    </div>
+    <div id="covidmap"></div>
+
     <!-- <p>{{ corona  }}</p> -->
     <div id="plotArea1">
         <h2>View statistics by location</h2>
@@ -43,6 +100,29 @@
 
 
 </body>
+<script>
+
+    // === Load in data === //
+    var data = {{ corona | tojson | safe }};
+    var rona = JSON.parse(data);
+    var obj = rona[0];
+    console.log(obj);
+
+
+    const mymap = L.map('covidmap').setView([0, 0], 2);
+    const attribution = 
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'; 
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    const tiles = L.tileLayer(tileUrl,{ attribution }); 
+    tiles.addTo(mymap);
+
+    // for(i=0;i<)
+
+
+
+
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.33.1/plotly.min.js"></script>
 <script>
 
@@ -125,6 +205,11 @@
 
     };
     selectedLocation.innerText = document.getElementById('countrySelect').value;
+
+
+
+
+    
 
     // ==== Update Plot === //
     document.getElementById('countrySelect').addEventListener('change',()=>{
@@ -289,6 +374,41 @@
 
     };
     initComp();
+
+
+    
+    // ==== Plot on map ==== // 
+    for(i=0;i<list.length;i++){
+
+        var con = list[i];
+        var coords = obj['Coords'][i];
+        var total = obj['TotalCases'][i];
+        var active = obj['ActiveCases'][i];
+        var loc = obj['Country,Other'][i];
+        var rec = obj['TotalRecovered'][i];
+
+        if(loc == 'CAR'){
+            continue
+        };
+
+
+        var text = `<h2>${loc}<h2>
+                    <h4>Total Cases: ${total}<h4>
+                    <h4>Active Cases: ${active}<h4>
+                    <h4>Recovered: ${rec}`;
+
+        L.circle(coords, {
+        fillOpacity: 0.75,
+        color: 'white',
+        fillColor: 'grey',
+        radius: 200000
+        }).bindPopup(text).addTo(mymap);
+
+
+
+        // console.log(coords)
+
+    }
     
 
 </script>
