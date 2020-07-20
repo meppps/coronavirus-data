@@ -34,7 +34,7 @@ def scrape():
 
     # Parse data, loop thru countries
     countries = []
-    
+
     for i in range(len(trs)):
         # If country row, pull data
         if 'href="country' in str(trs[i]):
@@ -76,4 +76,14 @@ def scrape():
             print('\n')
             i+=1
 
+    # Create dictionary of new country stats
+    countryDict = {
+        'countries': countries
+    }
 
+    # Update data in db
+    collection = db.corona_data
+
+    collection.update_one({},{"$set":{"countries":countryDict['countries']}})
+
+scrape()
