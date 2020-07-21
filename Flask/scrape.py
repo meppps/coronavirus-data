@@ -105,7 +105,8 @@ def scrape():
         'activeCases': activeCasesList,
         'population': populationList,
         'coords': coordsData,
-        'newCases': newCasesList
+        'newCases': newCasesList,
+        'tests': testsList
     }
     updatedData = [countryDict]
 

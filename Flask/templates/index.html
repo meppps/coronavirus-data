@@ -130,7 +130,7 @@ body{
     // === Load in data === //
     var data = {{ corona | tojson | safe }};
     var rona = JSON.parse(data);
-    var obj = rona[0];
+    var obj = rona[0]['countries'][0];
     console.log(obj)
 
     // === Predefined functions === //
@@ -159,12 +159,13 @@ body{
     // === Initial plot === //
     // ===================== //
 
-    var totalCases = obj['TotalCases'][0];
-    var newCases = obj['NewCases'][0];
-    var totalRecovered = obj['TotalRecovered'][0];
-    var totalDeaths = obj['TotalDeaths'][0];
-    var newDeaths = parseInt(obj['NewDeaths'][0]);
-    var activeCases = obj['ActiveCases'][0];
+    var totalCases = obj['totalCases'];
+    var newCases = obj['newCases'];
+    var totalRecovered = obj['recovered'];
+    var totalDeaths = obj['deaths'];
+    // var newDeaths = parseInt(obj['NewDeaths']);
+    var activeCases = obj['activeCases'];
+    var tests = obj['tests'];
     var selectedLocation = document.getElementById('location');
     var selectedMetric = document.getElementById('selectedMetric');
 
@@ -175,7 +176,7 @@ body{
         {
             // title: country,
             x: ['Total Cases', 'Active Cases','New Cases','Recovered','Deaths'],
-            y: [totalCases ,activeCases, newCases, totalRecovered, totalDeaths],
+            y: [totalCases[0] ,activeCases[0], newCases[0], totalRecovered[0], totalDeaths[0]],
             type: 'bar',
             marker:{
             color: ['#856c8b', '#ff7f50', '#ffeb99', '#a7e9af', '#f67280']
@@ -191,8 +192,8 @@ body{
 
 
     // Create list of countries
-    var countries = obj['Country,Other'];
-    var length = Object.values(countries).length;
+    var countries = obj['name'];
+    var length = countries.length;
     var list = [];
     for(i=0;i<length;i++){
 
@@ -217,12 +218,13 @@ body{
         // Get values
         var country = document.getElementById('countrySelect').value;
         var index = findIndex(country);
-        var totalCases = obj['TotalCases'][index];
-        var newCases = obj['NewCases'][index];
-        var totalRecovered = obj['TotalRecovered'][index];
-        var totalDeaths = obj['TotalDeaths'][index];
-        var newDeaths = parseInt(obj['NewDeaths'][index]);
-        var activeCases = obj['ActiveCases'][index];
+        var totalCases = obj['totalCases'][index];
+        var newCases = obj['newCases'][index];
+        var totalRecovered = obj['recovered'][index];
+        var totalDeaths = obj['deaths'][index];
+        var newDeaths = parseInt(obj['deaths'][index]);
+        var activeCases = obj['activeCases'][index];
+        var selectedTests = obj['tests'][index];
 
 
         // Plot
@@ -256,15 +258,17 @@ body{
         var compr1 = document.getElementById('compr1');
         var compr2 = document.getElementById('compr2');
         var metricSelector = document.getElementById('metric');
-        var metrics = ['Total Cases','Active Cases','New Cases','Recovered','Deaths'];
+        var metrics = ['Total Cases','Active Cases','New Cases','Recovered','Deaths','Tests','Population'];
 
 
         function getMetric(m){
-            return m === 'Total Cases' ? 'TotalCases':
-            m === 'Active Cases' ? 'ActiveCases':
-            m === 'New Cases' ? 'NewCases':
-            m === 'Recovered' ? 'TotalRecovered':
-            m === 'Deaths' ? 'TotalDeaths':
+            return m === 'Total Cases' ? 'totalCases':
+            m === 'Active Cases' ? 'activeCases':
+            m === 'New Cases' ? 'newCases':
+            m === 'Recovered' ? 'recovered':
+            m === 'Deaths' ? 'deaths':
+            m === 'Tests' ? 'tests':
+            m === 'Population' ? 'population':
             'None';
         };
 
@@ -295,16 +299,16 @@ body{
         initSelector(compr4);
 
 
-        var total1 = obj['TotalCases'][1];
-        var total2 = obj['TotalCases'][2];
-        var total3 = obj['TotalCases'][3];
-        var total4 = obj['TotalCases'][4];
+        var total1 = obj['totalCases'][0];
+        var total2 = obj['totalCases'][1];
+        var total3 = obj['totalCases'][2];
+        var total4 = obj['totalCases'][3];
 
 
         var comp = [
             {
                 x:[total1,total2,total3,total4],
-                y:[list[1],list[2],list[3],list[4]],
+                y:[list[0],list[1],list[2],list[3]],
                 orientation: 'h',
                 type:'bar',
                 marker:{
@@ -381,11 +385,15 @@ body{
     for(i=0;i<list.length;i++){
 
         var con = list[i];
-        var coords = obj['Coords'][i];
-        var total = obj['TotalCases'][i];
-        var active = obj['ActiveCases'][i];
-        var loc = obj['Country,Other'][i];
-        var rec = obj['TotalRecovered'][i];
+        var coords = obj['coords'][i];
+        var total = obj['totalCases'][i];
+        var active = obj['activeCases'][i];
+        var loc = obj['name'][i];
+        var rec = obj['recovered'][i];
+        var pop = obj['population'][i];
+        var test = obj['tests'][i];
+        var fatal = obj['deaths'][i];
+        var newCase = obj['newCases'][i];
 
         if(loc == 'CAR'){
             continue
@@ -393,9 +401,13 @@ body{
 
 
         var text = `<h2>${loc}<h2>
+                    <h4>Population: ${pop}<h4>
                     <h4>Total Cases: ${total}<h4>
                     <h4>Active Cases: ${active}<h4>
-                    <h4>Recovered: ${rec}`;
+                    <h4>New Cases: ${newCase}</h4>
+                    <h4>Tests: ${test}</h4>
+                    <h4>Recovered: ${rec}</h4>
+                    <h4>Fatal: ${fatal}</h4>`;
 
         L.circle(coords, {
         fillOpacity: 0.75,
