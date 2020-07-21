@@ -33,6 +33,7 @@ def scrape():
     coordsList = collection.find_one()['countries']
 
     # Parse data, loop thru countries
+    # Loop through countries
     countries = []
 
     names = []
@@ -44,6 +45,7 @@ def scrape():
     populationList = []
     coordsData = []
     newCasesList = []
+    coordsFound = False
 
     for i in range(len(trs)):
         # If country row, pull data
@@ -57,23 +59,27 @@ def scrape():
             tests = country[14].split("\">")[1].split('<')[0]
             population = country[16].split('>')[2].split('<')[0]
             
-            #Prevent indexing problems if no coords found
-            lat = 0
-            lng = 0
-            
+
             for x in range(len(coordsList)):
                 if coordsList[x]['name'] == name:
-    #                 print(coordsList[x])
                     lat = coordsList[x]['lat']
                     lng = coordsList[x]['lng']
+                    coordsFound = True
                     break
+                else:
+                    lat = 0
+                    lng = 0
+                    
+            # if coordsFound == False:
+            #     lat = 0
+            #     lng = 0
             
             
             try:
                 newCases = country[4].split('>+')[1].split('</')[0]
             except:
                 newCases = 0
-    #         print(name,totalCases,deaths,recovered,activeCases,tests,population,newCases)
+
             
             names.append(name)
             totalCasesList.append(totalCases)
@@ -86,9 +92,9 @@ def scrape():
             newCasesList.append(newCases)
             
             
-    #         print('\n')
-            i+=1
 
+            coordsFound = False
+            i+=1
 
     # Create dictionary of new country stats
     countryDict = {
