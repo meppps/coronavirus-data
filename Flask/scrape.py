@@ -21,7 +21,7 @@ def scrape():
     }
 
     r = requests.get(url, headers=header)
-    soup = BeautifulSoup(r.text)
+    soup = BeautifulSoup(r.text,'lxml')
 
     trs = soup.find_all('tr')
 
@@ -35,6 +35,16 @@ def scrape():
     # Parse data, loop thru countries
     countries = []
 
+    names = []
+    totalCasesList = []
+    deathsList = []
+    recoveredList = []
+    activeCasesList = []
+    testsList = []
+    populationList = []
+    coordsData = []
+    newCasesList = []
+
     for i in range(len(trs)):
         # If country row, pull data
         if 'href="country' in str(trs[i]):
@@ -47,6 +57,10 @@ def scrape():
             tests = country[14].split("\">")[1].split('<')[0]
             population = country[16].split('>')[2].split('<')[0]
             
+            #Prevent indexing problems if no coords found
+            lat = 0
+            lng = 0
+            
             for x in range(len(coordsList)):
                 if coordsList[x]['name'] == name:
     #                 print(coordsList[x])
@@ -58,32 +72,39 @@ def scrape():
             try:
                 newCases = country[4].split('>+')[1].split('</')[0]
             except:
-                newCases = 'n/a'
+                newCases = 0
     #         print(name,totalCases,deaths,recovered,activeCases,tests,population,newCases)
             
-            countryObj = {
-                'name': name,
-                'totalCases' : totalCases,
-                'deaths' : deaths,
-                'recovered' : recovered,
-                'activeCases' : activeCases,
-                'tests' : tests,
-                'population' : population,
-                'coords' : [lng, lat]
-            }
-            print(countryObj)
-            countries.append(countryObj)
-            print('\n')
+            names.append(name)
+            totalCasesList.append(totalCases)
+            deathsList.append(deaths)
+            activeCasesList.append(activeCases)
+            recoveredList.append(recovered)
+            populationList.append(population)
+            testsList.append(tests)
+            coordsData.append([lat,lng])
+            newCasesList.append(newCases)
+            
+            
+    #         print('\n')
             i+=1
+
 
     # Create dictionary of new country stats
     countryDict = {
-        'countries': countries
+        'name': names,
+        'totalCases': totalCasesList,
+        'deaths': deathsList,
+        'recovered': recoveredList, 
+        'activeCases': activeCasesList,
+        'population': populationList,
+        'coords': coordsData,
+        'newCases': newCasesList
     }
+    updatedData = [countryDict]
 
     # Update data in db
     collection = db.corona_data
-
-    collection.update_one({},{"$set":{"countries":countryDict['countries']}})
+    collection.update_one({},{"$set":{"countries":updatedData}})
 
 scrape()
